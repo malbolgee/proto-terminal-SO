@@ -2,6 +2,8 @@
 #include <time.h>
 #include <pwd.h>
 #include <grp.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <regex.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -23,16 +25,6 @@ int main(int argc, char **argv)
     unsigned char flag = 0;
     bool is_l, is_t, is_s, is_a, has_path;
 
-    // printf("-l: %8d\n", IS_L_FLAG);
-    // printf("-l -a: %8d\n", IS_L_FLAG | IS_A_FLAG);
-    // printf("-l -a -t: %8d\n", IS_L_FLAG | IS_A_FLAG | IS_T_FLAG);
-    // printf("-l -a -S: %8d\n", IS_L_FLAG | IS_A_FLAG | IS_S_FLAG);
-    // printf("-l -t: %8d\n", IS_L_FLAG | IS_T_FLAG);
-    // printf("-l -S: %8d\n", IS_L_FLAG | IS_S_FLAG);
-    // printf("-a: %8d\n", IS_A_FLAG);
-    // printf("-S: %8d\n", IS_S_FLAG);
-    // printf("-t: %8d\n", IS_T_FLAG);
-
     if (argc >= 2)
     {
 
@@ -41,7 +33,7 @@ int main(int argc, char **argv)
         {
 
             bool is_match = match(argv[i], REGEX_PATTERN_PATH) || match(argv[i], REGEX_PATTERN_FPATH);
-            if ((strcmp(argv[i], "-l") == 0) && !is_t)
+            if ((strcmp(argv[i], "-l") == 0) && !is_l)
                 flag |= IS_L_FLAG, is_l = true;
             else if ((strcmp(argv[i], "-a") == 0) && !is_a)
                 flag |= IS_A_FLAG, is_a = true;
@@ -70,16 +62,24 @@ int main(int argc, char **argv)
     unsigned entryCount = 0;
 
     if (has_path)
-        chdir(argv[idx]), folder = opendir(getcwd(NULL, PATH_MAX));
+    {
+        if (chdir(argv[idx]) < 0)
+        {
+
+            perror("Não foi possível abrir o diretório");
+            return errno;
+
+        }
+
+        folder = opendir(getcwd(NULL, PATH_MAX));
+    }
     else
         folder = opendir(getcwd(NULL, PATH_MAX));
 
     if (folder == NULL)
     {
-
-        printf("Unable to read directory");
-        perror("Unable to read directory");
-        return 1;
+        perror("Não foi possível abrir o diretório");
+        return errno;
     }
 
     // Aloca vetor do tipo entry_t com 100 posições, por enquanto vou deixar assim
@@ -214,7 +214,7 @@ struct tm *tm_alloc(const time_t *timer)
     return aux;
 }
 
-
+/* Usa regex para testar STRING contra a expressão regular em PATTERN. */
 bool match(const char *string, const char *pattern)
 {
 
@@ -228,6 +228,7 @@ bool match(const char *string, const char *pattern)
     return status != REG_NOMATCH ? true : false;
 
 }
+
 
 /* Seleciona de acordo com FLAG qual tipo de saída deve ser impressa. */
 void showOutput(entry_t *entry, size_t size, const char *string, unsigned int flag)
@@ -284,7 +285,7 @@ void showAllInfo(entry_t *entry, const size_t size, const char *string, __sort_t
 
 }
 
-/* Ordena ENTRY com QSORT utilizando uma função FUNC_AUX para comparação e imprime a informação reduzida da entrada. */
+/* Ordena ENTRY com SORT utilizando uma função FUNC_AUX para comparação e imprime a informação reduzida da entrada. */
 void showMinInfo(entry_t *entry, const size_t size, const char *string, __sort_t ord_func, __compar_fn_t func_aux)
 {
     ord_func(entry, size, sizeof(entry_t), func_aux);
