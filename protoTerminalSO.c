@@ -53,8 +53,8 @@ int parserSO (char *input){
 
     char *stringToParse, *token, *command; // declara variáveis para tokenização da entrada
     char *tokenizedString[100];
-    char argsString1[10][14] = { 0 };
-    char argsString2[10][14] = { 0 };
+    char *argsString1[10] = { 0 };
+    char *argsString2[10] = { 0 };
     unsigned args1Index = 0;
     unsigned args2Index = 0;
     int tokenTypes[100];    // 0 para ls
@@ -72,9 +72,9 @@ int parserSO (char *input){
     bool runParallel, setOutput, setInput, isPipe; // declara flags de modificadores
     char *customInput, *customOutput;
 
-    for(int k = 0; k < 10; ++k){
-        printf("%s\n", argsString1[k]);
-    }
+    // for(int k = 0; k < 10; ++k){
+    //     printf("%s\n", argsString1[k]);
+    // }
 
     int commandID, modifierID, patternTest, tokensIndex = 0;
     regex_t regexProg, regexArg, regexFile;
@@ -100,7 +100,7 @@ int parserSO (char *input){
             tokenizedString[tokensIndex] = strdup(token);
 
             commandID = commandCheckerSO(token, validCommands, numberOfCommands);
-            printf("commandID: %d\n", commandID);
+            // printf("commandID: %d\n", commandID);
             if(commandID != -1){
                 tokenTypes[tokensIndex] = commandID;
             }
@@ -119,21 +119,33 @@ int parserSO (char *input){
         }
         tokenizedString[tokensIndex] = 0;
 
-        for(int l = 0; l < tokensIndex; ++l){
-            printf("tokenizedString[%d]: %s\ntokenTypes[%d]: %d\n", l, tokenizedString[l], l, tokenTypes[l]);
-        }
-        puts("-----------------");
-        /*
+        // for(int l = 0; l < tokensIndex; ++l){
+        //     printf("tokenizedString[%d]: %s\ntokenTypes[%d]: %d\n", l, tokenizedString[l], l, tokenTypes[l]);
+        // }
+        // puts("-----------------");
+        
         for(int j = 0; j < tokensIndex; ++j){
-            printf("tokenTypes[%d] = %d\n", j, tokenTypes[j]);
+            // printf("tokenTypes[%d] = %d\n", j, tokenTypes[j]);
             switch(tokenTypes[j]){
                 case -1:
-                    break;
+                    printf("%s : Token não reconhecido\n", tokenizedString[j]);
+                    return -1;
                 case 1:
+                    argsString1[0] = strdup(tokenizedString[j]);
+
+                    if(j < (tokensIndex - 1)){
+                        argsString1[1] = strdup(tokenizedString[j+1]);
+                    }
+
+                    cdcall(argsString1, 2);
+                    j = tokensIndex;
+
+                    break;
+                    /*
                     if(tokenizedString[j+1] != 0){
                         puts("print de caso.");
-                        // argsString1[0] = strdup(tokenizedString[j]);
-                        // argsString1[1] = strdup(tokenizedString[j+1]);
+                        argsString1[0] = strdup(tokenizedString[j]);
+                        argsString1[1] = strdup(tokenizedString[j+1]);
 
                         strcpy(argsString1[0], tokenizedString[j]);
                         strcpy(argsString1[1], tokenizedString[j+1]);
@@ -142,76 +154,82 @@ int parserSO (char *input){
                         j = tokensIndex;
                     }
                     break;
-                case 5:
-                    break;
-                case 6:
-                    if(!setInput){
-                        if((j < (tokensIndex-1)) && (tokenTypes[j+1] == 5)){
-                            setInput = true;
-                            customInput = strdup(tokenizedString[j+1]);
-                            ++j;
-                        }
-                        else{
-                            puts("Operador '<' requer um nome de arquivo como argumento.");
-                            return -1;
-                        }
-                    }
-                    else{
-                        puts("Terminal não suporta múltiplos redirecionamentos de entrada.");
-                    }
-                    break;
-                case 7:
-                    if(!setOutput){
-                        if((j < (tokensIndex-1)) && (tokenTypes[j+1] == 5)){
-                            setOutput = true;
-                            customOutput = strdup(tokenizedString[j+1]);
-                            ++j;
-                        }
-                        else{
-                            puts("Operador '>' requer um nome de arquivo como argumento.");
-                            return -1;
-                        }
-                    }
-                    else{
-                        puts("Terminal não suporta múltiplos redirecionamentos de saída.");
-                        return -1;
-                    }
-                    break;
-                case 8:
-                    if(!isPipe){
-                        if((j < (tokensIndex-1)) && (tokenTypes[j+1] == 3)){
-                            isPipe = true;
-                        }
-                    }
-                    else{
-                        puts("Terminal não suporta múltiplas instâncias de pipe.");
-                        return -1;
-                    }
-                    break;
-                case 9:
-                    runParallel = true;
-                    break;
+                    */
 
-                case 0:
-                    puts("teste do case 0.");
-                    printf("%d\n", args1Index);
-                    strcpy(argsString1[args1Index], customCommandNames[0]);
-                    ++args1Index;
-                    break;
                 default:
-                    puts("print do default.");
-                    strcpy(argsString1[args1Index], tokenizedString[j]);
-                    // argsString1[args1Index] = strdup(tokenizedString[j]);
-                    ++args1Index;
+                    break;
+                
+                // case 5:
+                //     break;
+                // case 6:
+                //     if(!setInput){
+                //         if((j < (tokensIndex-1)) && (tokenTypes[j+1] == 5)){
+                //             setInput = true;
+                //             customInput = strdup(tokenizedString[j+1]);
+                //             ++j;
+                //         }
+                //         else{
+                //             puts("Operador '<' requer um nome de arquivo como argumento.");
+                //             return -1;
+                //         }
+                //     }
+                //     else{
+                //         puts("Terminal não suporta múltiplos redirecionamentos de entrada.");
+                //     }
+                //     break;
+                // case 7:
+                //     if(!setOutput){
+                //         if((j < (tokensIndex-1)) && (tokenTypes[j+1] == 5)){
+                //             setOutput = true;
+                //             customOutput = strdup(tokenizedString[j+1]);
+                //             ++j;
+                //         }
+                //         else{
+                //             puts("Operador '>' requer um nome de arquivo como argumento.");
+                //             return -1;
+                //         }
+                //     }
+                //     else{
+                //         puts("Terminal não suporta múltiplos redirecionamentos de saída.");
+                //         return -1;
+                //     }
+                //     break;
+                // case 8:
+                //     if(!isPipe){
+                //         if((j < (tokensIndex-1)) && (tokenTypes[j+1] == 3)){
+                //             isPipe = true;
+                //         }
+                //     }
+                //     else{
+                //         puts("Terminal não suporta múltiplas instâncias de pipe.");
+                //         return -1;
+                //     }
+                //     break;
+                // case 9:
+                //     runParallel = true;
+                //     break;
+
+                // case 0:
+                //     puts("teste do case 0.");
+                //     printf("%d\n", args1Index);
+                //     strcpy(argsString1[args1Index], customCommandNames[0]);
+                //     ++args1Index;
+                //     break;
+                // default:
+                //     puts("print do default.");
+                //     strcpy(argsString1[args1Index], tokenizedString[j]);
+                //     // argsString1[args1Index] = strdup(tokenizedString[j]);
+                //     ++args1Index;
+                
             }
             
-            char *emptyString = (char *) (NULL);
-            strcpy(argsString1[args1Index], emptyString);
+            // char *emptyString = (char *) (NULL);
+            // strcpy(argsString1[args1Index], emptyString);
         }
 
-        for(int k = 0; k < 10; ++k){
-            printf("-=-%s\n", argsString1[k]);
-        }
+        // for(int k = 0; k < 10; ++k){
+        //     printf("-=-%s\n", argsString1[k]);
+        // }
 
         if(strcmp(argsString1[0], "cd") != 0){
             int id = fork();
@@ -239,7 +257,7 @@ int parserSO (char *input){
                 }
             }
         }
-        */
+        
         /*
         if((3 < tokenTypes[0]) && (tokenTypes[0] < 0)){
             printf("%s: token não é válido", tokenizedString[0]);
@@ -318,12 +336,12 @@ int commandCheckerSO (char *stringToCheck, const char **commandsList, unsigned n
 
 int modifierCheckerSO (char *stringToCheck, const char **modifiersList, unsigned numberOfModifiers){
     unsigned i;
-    printf("Testando para modificadores... Entrada: %s\n", stringToCheck);
+    // printf("Testando para modificadores... Entrada: %s\n", stringToCheck);
 
     for(i = 0; i < numberOfModifiers; ++i){
-        printf("Símbolo a comparar com entrada: %s\n", modifiersList[i]);
+        // printf("Símbolo a comparar com entrada: %s\n", modifiersList[i]);
         if(strcmp(stringToCheck, modifiersList[i]) == 0){
-            printf("Match entre '%s' e '%s', resultado de saída: %d\n", stringToCheck, modifiersList[i], (i + 6));
+            // printf("Match entre '%s' e '%s', resultado de saída: %d\n", stringToCheck, modifiersList[i], (i + 6));
             return (i + 6);
         }
     }
@@ -369,9 +387,9 @@ int cdcall(char **argv, int argc){
     int i, j = 0;
     char buffer[PATH_MAX]; 
 
-    for(int i = 0; i < argc; ++i){
-        printf("%s\n", argv[i]);
-    }
+    // for(int i = 0; i < argc; ++i){
+    //     printf("%s\n", argv[i]);
+    // }
     
     char *aux = malloc(sizeof(char) * 100);//aloca string aux na memoria e copia o argumento diretorio para ela
     // char *aux2 = malloc(sizeof(char) * 100); 
