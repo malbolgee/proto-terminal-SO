@@ -254,7 +254,7 @@ int cdcall(int argc, char **argv)
     {
         
         char buff[PATH_MAX];
-        char *aux = (char *)calloc(PATH_MAX << 1, sizeof(char));
+        char aux[PATH_MAX << 1];
 
         if (match(argv[1], REGEX_PATTERN_NPATHNAME))
             strcat(aux, getcwd(buff, PATH_MAX)), dirname(aux);
@@ -263,8 +263,6 @@ int cdcall(int argc, char **argv)
 
         if (chdir(aux) == -1)
             perror("Erro ao abrir o diretório");
-
-        free(aux);
 
     }
 
@@ -286,7 +284,7 @@ int pwdcall(int argc, char **argv)
     return 0;
 }
 
-/* Faz uma chamda de função utilizando redirecionamento de saída. 
+/* Faz uma chamada de função utilizando redirecionamento de saída. 
    O programa1 escreve na entrada do programa2. */
 int pipecall(prog_t *program)
 {
@@ -295,7 +293,6 @@ int pipecall(prog_t *program)
     pipe(fd);
 
     int id1 = fork();
-
     if (id1 == -1)
     {
 
@@ -397,7 +394,7 @@ int inputcall(prog_t *program)
     else if (id == 0)
     {
 
-        int file = open(program[1].progname, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        int file = open(program[1].progname, O_RDONLY);
         dup2(file, STDIN_FILENO);
         close(file);
 
