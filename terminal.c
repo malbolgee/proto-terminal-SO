@@ -68,7 +68,7 @@ int main(int argc, char **argv)
                 char *myargs[3] = {"pwd", 0, 0};
                 pwdcall(1, myargs);
             }
-            else if (strcmp(program[0].progname, "./lsd") == 0)
+            else
             {
 
                 char *myargs[10] = {NULL};
@@ -87,6 +87,7 @@ int main(int argc, char **argv)
 
                 wait(0);
             }
+
         }
 
         printf("%s%s%s$ ", BLUE, getcwd(buff, PATH_MAX), DEFAULT);
