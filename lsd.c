@@ -2,6 +2,7 @@
 #include <time.h>
 #include <pwd.h>
 #include <grp.h>
+#include <err.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <regex.h>
@@ -13,10 +14,13 @@
 #include <stdbool.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/param.h>
 #include "lsd.h"
 
 const char *colorsCodes[] = {"\033[1;31m", "\033[1;34m", "\033[1;32m", "\033[0m"};
 const int pflags[] = {S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP, S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH};
+
+bool stdout_custom_file;
 
 int main(int argc, char **argv)
 {
@@ -126,7 +130,14 @@ int main(int argc, char **argv)
         ++entryCount;
     }
 
-    char *formated_str = is_l ? "%s %d %-5.8s %-5.8s %6ld %s %s%s%s\n" : "%s%s%s%c";
+    char *formated_str;
+    stdout_custom_file = isatty(STDOUT_FILENO);
+
+    if (!stdout_custom_file)
+        formated_str = is_l ? "%s %d %-5.8s %-5.8s %6ld %s %s\n" : "%s%c";
+    else
+        formated_str = is_l ? "%s %d %-5.8s %-5.8s %6ld %s %s%s%s\n" : "%s%s%s%c";
+
     showOutput(entries, entryCount, formated_str, flag);
     
     closedir(folder);
@@ -279,8 +290,18 @@ void showAllInfo(entry_t *entry, const size_t size, const char *string, __sort_t
     ord_func(entry, size, sizeof(entry_t), func_aux);
     for (size_t i = 0; i < size; ++i)
     {   
-        strftime(str_aux_dmod, sizeof(str_aux_dmod), "%b %-2d %H:%M", entry[i].dmod);
-        printf(string, entry[i].permissions, entry[i].type, entry[i].owner_name, entry[i].group_name, entry[i].file_size, str_aux_dmod, colorsCodes[entry[i].color], entry[i].file_name, colorsCodes[DFT]);
+        
+        if (!stdout_custom_file)
+        {
+            strftime(str_aux_dmod, sizeof(str_aux_dmod), "%b %-2d %H:%M", entry[i].dmod);
+            printf(string, entry[i].permissions, entry[i].type, entry[i].owner_name, entry[i].group_name, entry[i].file_size, str_aux_dmod, entry[i].file_name);
+        }
+        else
+        {
+            
+            strftime(str_aux_dmod, sizeof(str_aux_dmod), "%b %-2d %H:%M", entry[i].dmod);
+            printf(string, entry[i].permissions, entry[i].type, entry[i].owner_name, entry[i].group_name, entry[i].file_size, str_aux_dmod, colorsCodes[entry[i].color], entry[i].file_name, colorsCodes[DFT]);
+        }
     }
 
 }
@@ -288,7 +309,12 @@ void showAllInfo(entry_t *entry, const size_t size, const char *string, __sort_t
 /* Ordena ENTRY com SORT utilizando uma função FUNC_AUX para comparação e imprime a informação reduzida da entrada. */
 void showMinInfo(entry_t *entry, const size_t size, const char *string, __sort_t ord_func, __compar_fn_t func_aux)
 {
+
     ord_func(entry, size, sizeof(entry_t), func_aux);
     for (size_t i = 0; i < size; ++i)
-        printf(string, colorsCodes[entry[i].color], entry[i].file_name, colorsCodes[DFT], i < size - 1 ? ' ' : '\n');
+        if (!stdout_custom_file)
+            printf(string, entry[i].file_name, i < size - 1 ? ' ' : '\n');
+        else
+            printf(string, colorsCodes[entry[i].color], entry[i].file_name, colorsCodes[DFT], i < size - 1 ? ' ' : '\n');
+
 }
