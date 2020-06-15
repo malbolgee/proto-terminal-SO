@@ -6,11 +6,23 @@
 
 typedef struct __prog{
 
-    char progname[MAX_PROGNAME_SIZE];
-    char prog_args[MAX_PROGARGS][MAX_PROGARG_BUFFER_SIZE];
     unsigned argc;
+    char prog_args[MAX_PROGARGS][MAX_PROGARG_BUFFER_SIZE];
+    unsigned char mod;
 
 } prog_t;
+
+#define PIPE_READ_END 0x0
+#define PIPE_WRITE_END 0x1
+
+#define IS_NMOD_PIPE 0x1
+#define IS_NMOD_OUTPUT 0x2
+#define IS_NMOD_INPUT 0x4
+#define IS_MOD_AMPER 0x8
+
+#define IS_PMOD_PIPE (IS_NMOD_PIPE << 0x4)
+#define IS_PMOD_OUTPUT (IS_NMOD_OUTPUT << 0x4)
+#define IS_PMOD_INPUT (IS_NMOD_INPUT << 0x4)
 
 #define REGEX_PATTERN_PROGNAME "^(\\./)?[a-zA-Z0-9._-]+$"
 #define REGEX_PATTERN_ARGNAME "^-[a-zA-Z]$"
@@ -21,13 +33,17 @@ typedef struct __prog{
 #define BLUE "\033[1;34m"
 #define DEFAULT "\033[0m"
 
-bool match(const char *, const char *);
-bool is_modifier(void);
+void show_path_str(void);
 void check_modifier(char);
-prog_t *parse(int, char *const __argv[]);
 char **tolkenizer(char *);
 int cdcall(int, char **);
 int pwdcall(int, char **);
-int pipecall(prog_t *);
-int outputcall(prog_t *);
-int inputcall(prog_t *);
+bool match(const char *, const char *);
+prog_t *parse(int, char *const __argv[]);
+
+void close_stdout_pipe(int fd[2]);
+void close_stdin_pipe(int fd[2]);
+void close_stdin_input(char *);
+void close_stdout_output(char *);
+void close_fd(int (*fd)[2], size_t);
+void fill_args(char (*args)[MAX_PROGARG_BUFFER_SIZE], char *myargs[], int);
