@@ -1,8 +1,10 @@
 #pragma once
 
+#define MAX_PROGARGS 10
 #define MAX_PROGARG_BUFFER_SIZE 4096
 #define MAX_PROGNAME_SIZE MAX_PROGARG_BUFFER_SIZE
-#define MAX_PROGARGS 10
+#define MAX_USERNAME MAX_PROGARG_BUFFER_SIZE
+#define MAX_HOSTNAME MAX_USERNAME
 
 typedef struct __prog{
 
@@ -30,6 +32,7 @@ typedef struct __prog{
 #define REGEX_PATTERN_PATHNAME "^(((\\.\\.|\\.)?/[/a-zA-Z0-9._-]+)|(\\.{1,2}(/)?)|([/a-zA-Z0-9._-]+))$"
 #define REGEX_PATTERN_NPATHNAME "^(\\.\\.|\\.\\./)$"
 
+#define GREEN "\033[1;32m"
 #define BLUE "\033[1;34m"
 #define DEFAULT "\033[0m"
 
