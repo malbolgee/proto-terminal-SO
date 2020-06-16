@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 
     prog_t *program;
     char string[PATH_MAX];
-    
+
     show_path_str();
     while (scanf("%[^\n]%*c", string), strcmp(string, "exit") != 0)
     {
@@ -51,9 +51,7 @@ int main(int argc, char **argv)
 
                 show_path_str();
                 continue;
-
             }
-
         }
 
         if (strcmp(program[0].prog_args[0], "cd") == 0)
@@ -61,7 +59,6 @@ int main(int argc, char **argv)
             char *myargs[10] = {NULL};
             fill_args(program[0].prog_args, myargs, program[0].argc);
             cdcall(2, myargs);
-
         }
         else if (strcmp(program[0].prog_args[0], "pwd") == 0)
         {
@@ -69,7 +66,6 @@ int main(int argc, char **argv)
             char *myargs[10] = {NULL};
             fill_args(program[0].prog_args, myargs, program[0].argc);
             pwdcall(1, myargs);
-
         }
         else
         {
@@ -89,17 +85,16 @@ int main(int argc, char **argv)
 
                     perror("Erro");
                     return errno;
-
                 }
                 else if (id == 0)
                 {
-                    
+
                     /* O modificador do programa anterior é um pipe, 
                     fecha o stdin do programa atual e troca pelo fd[0]
                     do programa anterior. */
                     if (program[i].mod & IS_PMOD_PIPE)
                         close_stdin_pipe(fd[i - 1]);
-                    
+
                     /* O modificador do programa atual é um pipe,
                     fecha o stdout do programa atual e troca pelo fd[1]
                     do programa atual. */
@@ -130,19 +125,16 @@ int main(int argc, char **argv)
                     execvp(myargs[0], myargs);
                     perror("Erro");
                     return errno;
-
                 }
-
             }
 
             close_fd(fd, program_counter);
             if (!is_amper)
                 while ((wait(NULL) != -1) || (errno != ECHILD));
-
+                    
         }
 
         show_path_str();
-
     }
 
     return 0;
@@ -159,7 +151,7 @@ prog_t *parse(int __argc, char *const __argv[])
     program_counter = 0;
 
     wait_for_prog = true;
-    wait_for_arg  = false;
+    wait_for_arg = false;
     is_amper = is_pipe = false;
     is_input = is_pinput = false;
     is_output = is_poutput = false;
@@ -209,12 +201,10 @@ prog_t *parse(int __argc, char *const __argv[])
             {
                 wait_for_arg = false;
                 programs[k++].mod |= mod_flag;
-                programs[k].mod   |= (mod_flag << 4); // Setando a flag do anterior no próximo;
-
+                programs[k].mod |= (mod_flag << 4); // Setando a flag do anterior no próximo;
             }
             else
                 programs[k].mod |= mod_flag;
-            
         }
         else
         {
@@ -222,16 +212,15 @@ prog_t *parse(int __argc, char *const __argv[])
             printf("Erro de sintaxe próximo ao token `%s'\n", __argv[i]);
             return NULL;
         }
-
     }
-   
+
     if (wait_for_prog)
     {
 
         printf("Erro: o uso de modificadores '|', '>' e '<' requerem um segundo argumento.\n");
         return NULL;
     }
-   
+
     return programs;
 }
 
@@ -264,31 +253,31 @@ void check_modifier(char ch)
     switch (ch)
     {
 
-        case '|':
-            is_pipe = true;
-            mod_flag |= IS_NMOD_PIPE;
-            wait_for_prog = true;
-            wait_for_arg = false;
-            break;
-        case '<':
-            is_input = true;
-            mod_flag |= IS_NMOD_INPUT;
-            wait_for_prog = false;
-            wait_for_arg = true;
-            break;
-        case '>':
-            is_output = true;
-            mod_flag |= IS_NMOD_OUTPUT;
-            wait_for_prog = false;
-            wait_for_arg = true;
-            break;
-        case '&':
-            mod_flag |= IS_MOD_AMPER;
-            wait_for_arg = false;
-            is_amper = true;
-            break;
-        default:
-            puts("deu ruim");
+    case '|':
+        is_pipe = true;
+        mod_flag |= IS_NMOD_PIPE;
+        wait_for_prog = true;
+        wait_for_arg = false;
+        break;
+    case '<':
+        is_input = true;
+        mod_flag |= IS_NMOD_INPUT;
+        wait_for_prog = false;
+        wait_for_arg = true;
+        break;
+    case '>':
+        is_output = true;
+        mod_flag |= IS_NMOD_OUTPUT;
+        wait_for_prog = false;
+        wait_for_arg = true;
+        break;
+    case '&':
+        mod_flag |= IS_MOD_AMPER;
+        wait_for_arg = false;
+        is_amper = true;
+        break;
+    default:
+        puts("deu ruim");
     }
 }
 
@@ -312,9 +301,9 @@ int cdcall(int argc, char **argv)
 
     if (argv[1] != NULL)
     {
-        
-        char buff[PATH_MAX] = { 0 };
-        char aux[PATH_MAX << 1] = { 0 };
+
+        char buff[PATH_MAX] = {0};
+        char aux[PATH_MAX << 1] = {0};
 
         if (match(argv[1], REGEX_PATTERN_NPATHNAME))
             strcat(aux, getcwd(buff, PATH_MAX)), dirname(aux);
@@ -323,7 +312,6 @@ int cdcall(int argc, char **argv)
 
         if (chdir(aux) == -1)
             perror("Erro ao abrir o diretório");
-
     }
 
     return 0;
@@ -349,7 +337,6 @@ void close_stdout_pipe(int fd[2])
 {
 
     dup2(fd[PIPE_WRITE_END], STDOUT_FILENO);
-
 }
 
 /* Duplica FD[0] e fecha STDOUT. */
@@ -357,7 +344,6 @@ void close_stdin_pipe(int fd[2])
 {
 
     dup2(fd[PIPE_READ_END], STDIN_FILENO);
-
 }
 
 /* Duplica o FD gerado para ARG e fecha STDIN. */
@@ -367,7 +353,6 @@ void close_stdin_input(char *arg)
     int file = open(arg, O_RDONLY);
     dup2(file, STDIN_FILENO);
     close(file);
-
 }
 
 /* Duplica o FD gerado para ARG e fecha o STDOUT. */
@@ -377,7 +362,6 @@ void close_stdout_output(char *arg)
     int file = open(arg, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     dup2(file, STDOUT_FILENO);
     close(file);
-
 }
 
 /* Preenche MYARGS com ARGC argumentos de ARGS. */
@@ -386,37 +370,34 @@ void fill_args(char (*args)[MAX_PROGARG_BUFFER_SIZE], char *__myargs[], int __ar
 
     for (size_t i = 0; i < __argc; ++i)
         __myargs[i] = args[i];
-
 }
 
 /* Fecha SIZE - 1 files descriptors em FD. */
 void close_fd(int (*fd)[2], size_t size)
-{   
+{
 
     for (size_t i = 0; i < size - 1; ++i)
     {
         close(fd[i][PIPE_READ_END]);
         close(fd[i][PIPE_WRITE_END]);
     }
-
 }
 
+/* Mostra mostra uma string com username, hostname e o diretório atual. */
 void show_path_str(void)
 {
 
     char buff[PATH_MAX];
-    char *path = getenv("HOME");
+    char username[MAX_USERNAME];
+    char hostname[MAX_HOSTNAME];
 
     getcwd(buff, PATH_MAX);
+    char *path = getenv("HOME");
+    getlogin_r(username, sizeof(username));
+    gethostname(hostname, sizeof(hostname));
+
     if (strcmp(path, buff) == 0)
-        puts("$: ");
+        printf("%s%s@%s%s$: ", GREEN, username, hostname, DEFAULT);
     else
-    {
-
-        char bufff[PATH_MAX] = "~";
-        strcat(bufff , strrchr(buff, '/'));
-        printf("%s%s%s$: ", BLUE, bufff, DEFAULT);
-
-    }
-
+        printf("%s%s@%s%s:%s~%s%s$: ", GREEN, username, hostname, DEFAULT, BLUE, strrchr(buff, '/'), DEFAULT);
 }
