@@ -58,5 +58,5 @@
 - O comando pwd imprime o diretório atual
 
 - pwd [ _OPTION_ ] ...
- - -L Usa o PWD do ambiente, mesmo que contenha links simbólicos.
- - -P Evita todos os links simbólicos.
+  - -L Usa o PWD do ambiente, mesmo que contenha links simbólicos.
+  - -P Evita todos os links simbólicos.
